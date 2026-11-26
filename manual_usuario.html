@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Manuales de Usuario — UberBuses</title>
+  <style>
+    body { margin:0; font-family:'Plus Jakarta Sans',system-ui,sans-serif; background:#fafafa; color:#171717; display:grid; place-items:center; min-height:100dvh; padding:1.5rem; }
+    .card { max-width:680px; width:100%; background:#fff; border:1px solid #e5e5e5; border-radius:24px; padding:2rem; box-shadow:0 12px 30px rgba(0,0,0,0.06); }
+    h1 { margin:0 0 0.5rem; font-size:1.6rem; }
+    p { margin:0 0 1.5rem; color:#525252; font-size:0.95rem; }
+    .grid { display:grid; gap:0.85rem; }
+    a { display:flex; align-items:center; justify-content:space-between; padding:1rem 1.25rem; border-radius:16px; border:1px solid #e5e5e5; background:#fafafa; text-decoration:none; color:#171717; font-weight:700; transition:border-color .15s, background .15s; }
+    a:hover { border-color:#171717; background:#fff; }
+    span.sub { display:block; font-size:0.8rem; font-weight:500; color:#525252; margin-top:2px; }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>Manuales de Usuario — UberBuses</h1>
+    <p>Selecciona el manual correspondiente a tu perfil. Cada documento incluye únicamente las funciones de ese rol, con capturas en <strong>Vista PC</strong> y <strong>Vista Móvil</strong>.</p>
+    <div class="grid">
+      <a href="/manual_cliente.html"><div>Manual del Cliente (Pasajero)<span class="sub">Viajar, mapa en vivo, rutas, billetera y pagos QR/NFC</span></div><span>Abrir →</span></a>
+      <a href="/manual_conductor.html"><div>Manual del Conductor<span class="sub">Control de unidad, pasajeros, recaudo y reporte vial</span></div><span>Abrir →</span></a>
+      <a href="/manual_admin.html"><div>Manual del Administrador<span class="sub">Panel de flota, cooperativas, alertas y mapa global</span></div><span>Abrir →</span></a>
+    </div>
+  </main>
+</body>
+</html>

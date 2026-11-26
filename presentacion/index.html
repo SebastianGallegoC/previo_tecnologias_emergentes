@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UberBuses · Presentación de Proyecto</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-canvas: #f5f5f4;
+      --bg-card: #ffffff;
+      --bg-subtle: #fafaf9;
+      --ink-primary: #171717;
+      --ink-secondary: #52525b;
+      --ink-muted: #71717a;
+      --brand-50: #ecfdf5;
+      --brand-100: #d1fae5;
+      --brand-200: #a7f3d0;
+      --brand-500: #10b981;
+      --brand-600: #059669;
+      --brand-700: #047857;
+      --cucuta-gold: #f59e0b;
+      --cucuta-gold-bg: #fef3c7;
+      --cucuta-red: #dc2626;
+      --cucuta-red-bg: #fee2e2;
+      --border-soft: #e7e5e4;
+      --radius-slide: 28px;
+      --radius-card: 20px;
+      --radius-img: 16px;
+      --shadow-slide: 0 20px 50px -15px rgba(23, 23, 23, 0.08), 0 4px 16px -4px rgba(23, 23, 23, 0.04);
+      --shadow-card: 0 4px 20px -4px rgba(23, 23, 23, 0.05);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      block-size: 100dvh;
+      inline-size: 100dvw;
+      overflow: hidden;
+      background-color: var(--bg-canvas);
+      color: var(--ink-primary);
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Top Minimalist HUD */
+    .hud-header {
+      position: fixed;
+      inset-block-start: 16px;
+      inset-inline: 24px;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      pointer-events: none;
+    }
+
+    .hud-brand, .hud-controls {
+      pointer-events: auto;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-soft);
+      border-radius: 9999px;
+      padding: 6px 14px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+    }
+
+    .brand-icon {
+      inline-size: 28px;
+      block-size: 28px;
+      border-radius: 9px;
+      background: var(--ink-primary);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    .brand-name {
+      font-weight: 800;
+      font-size: 14px;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-name span {
+      font-weight: 500;
+      color: var(--ink-muted);
+    }
+
+    .hud-btn {
+      appearance: none;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--ink-primary);
+      border-radius: 9999px;
+      padding: 6px 10px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background-color 0.15s ease, transform 0.1s ease;
+    }
+
+    .hud-btn:hover {
+      background: var(--bg-canvas);
+    }
+
+    .hud-btn:active {
+      transform: scale(0.97);
+    }
+
+    .hud-btn:focus-visible {
+      outline: 2px solid var(--ink-primary);
+      outline-offset: 2px;
+    }
+
+    .slide-counter {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink-secondary);
+      font-variant-numeric: tabular-nums;
+      padding-inline: 6px;
+    }
+
+    /* Horizontal Snap Deck */
+    .deck {
+      display: flex;
+      inline-size: 100dvw;
+      block-size: 100dvh;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      scrollbar-width: none;
+    }
+
+    .deck::-webkit-scrollbar {
+      display: none;
+    }
+
+    .slide-wrapper {
+      flex: 0 0 100dvw;
+      inline-size: 100dvw;
+      block-size: 100dvh;
+      scroll-snap-align: start;
+      display: grid;
+      place-items: center;
+      padding: 68px 28px 64px;
+    }
+
+    .slide-card {
+      inline-size: min(1140px, 100%);
+      block-size: min(680px, 100%);
+      background: var(--bg-card);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-slide);
+      box-shadow: var(--shadow-slide);
+      padding: clamp(24px, 4vw, 48px);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 20px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Typography & Badges */
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      inline-size: fit-content;
+    }
+
+    .pill-brand {
+      background: var(--brand-50);
+      color: var(--brand-700);
+      border: 1px solid var(--brand-200);
+    }
+
+    .pill-dark {
+      background: var(--ink-primary);
+      color: #ffffff;
+    }
+
+    .pill-gold {
+      background: var(--cucuta-gold-bg);
+      color: #b45309;
+    }
+
+    .pill-red {
+      background: var(--cucuta-red-bg);
+      color: var(--cucuta-red);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.2rem, 4.5vw, 3.6rem);
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      line-height: 1.05;
+      text-wrap: balance;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: clamp(1.5rem, 2.8vw, 2.25rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      text-wrap: balance;
+    }
+
+    h3 {
+      margin: 0;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    p {
+      margin: 0;
+      color: var(--ink-secondary);
+      line-height: 1.55;
+      text-wrap: pretty;
+    }
+
+    .accent-emerald {
+      color: var(--brand-600);
+    }
+
+    /* Grids & Cards */
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+      flex: 1;
+      align-content: center;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px;
+      flex: 1;
+      align-items: center;
+      min-block-size: 0;
+    }
+
+    .grid-asymmetric {
+      display: grid;
+      grid-template-columns: 1.05fr 1.35fr;
+      gap: 24px;
+      flex: 1;
+      align-items: center;
+      min-block-size: 0;
+    }
+
+    .bento-card {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-card);
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .bento-card.highlight {
+      background: var(--brand-50);
+      border-color: var(--brand-200);
+    }
+
+    .icon-box {
+      inline-size: 40px;
+      block-size: 40px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      font-size: 18px;
+      background: #fff;
+      border: 1px solid var(--border-soft);
+      color: var(--ink-primary);
+    }
+
+    .icon-box.emerald {
+      background: var(--brand-500);
+      border-color: var(--brand-600);
+      color: #fff;
+    }
+
+    /* Screenshot Frames (Mobile Portrait Showcase) */
+    .shot-frame {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--radius-card);
+      padding: 12px;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      block-size: 100%;
+      max-block-size: 465px;
+      cursor: zoom-in;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .shot-frame:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px -8px rgba(23, 23, 23, 0.12);
+    }
+
+    .shot-frame img {
+      display: block;
+      inline-size: auto;
+      max-inline-size: 100%;
+      block-size: 100%;
+      flex: 1;
+      min-block-size: 0;
+      object-fit: contain;
+      border-radius: 20px;
+      border: 3px solid var(--ink-primary);
+      background: #fff;
+      box-shadow: 0 8px 20px -6px rgba(23, 23, 23, 0.16);
+    }
+
+    .shot-caption {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      inline-size: 100%;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink-secondary);
+      padding-inline: 4px;
+    }
+
+    .shot-caption span.tag {
+      color: var(--brand-700);
+      background: var(--brand-100);
+      padding: 2px 8px;
+      border-radius: 9999px;
+      font-size: 11px;
+    }
+
+    /* Tag list */
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-soft);
+      border-radius: 9999px;
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink-primary);
+    }
+
+    /* Cover Hero */
+    .cover-layout {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 32px;
+      align-items: center;
+      flex: 1;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .stat-box {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-soft);
+      border-radius: 18px;
+      padding: 18px;
+    }
+
+    .stat-value {
+      font-size: 1.75rem;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      color: var(--ink-primary);
+    }
+
+    .stat-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink-muted);
+      margin-block-start: 4px;
+    }
+
+    /* Footer Navigation Dots */
+    .hud-footer {
+      position: fixed;
+      inset-block-end: 16px;
+      inset-inline: 0;
+      display: flex;
+      justify-content: center;
+      z-index: 20;
+      pointer-events: none;
+    }
+
+    .dot-nav {
+      pointer-events: auto;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-soft);
+      border-radius: 9999px;
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+    }
+
+    .dot-nav ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .dot-link {
+      display: block;
+      inline-size: 10px;
+      block-size: 10px;
+      border-radius: 9999px;
+      background: #d4d4d8;
+      transition: inline-size 0.2s ease, background-color 0.2s ease;
+    }
+
+    .dot-link[aria-current="location"] {
+      inline-size: 28px;
+      background: var(--brand-500);
+    }
+
+    /* Lightbox Dialog */
+    dialog#lightbox {
+      border: none;
+      border-radius: 24px;
+      padding: 14px;
+      background: #ffffff;
+      max-inline-size: 92dvw;
+      max-block-size: 90dvh;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
+    }
+
+    dialog#lightbox::backdrop {
+      background: rgba(23, 23, 23, 0.65);
+      backdrop-filter: blur(6px);
+    }
+
+    .lightbox-inner {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .lightbox-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-inline: 6px;
+    }
+
+    .lightbox-inner img {
+      max-inline-size: 86dvw;
+      max-block-size: 76dvh;
+      border-radius: 14px;
+      border: 1px solid var(--border-soft);
+      object-fit: contain;
+    }
+
+    /* Slide Header */
+    .slide-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .slide-time {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--ink-muted);
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-soft);
+      padding: 6px 12px;
+      border-radius: 9999px;
+      white-space: nowrap;
+    }
+
+    @media (max-width: 900px) {
+      .cover-layout, .grid-3, .grid-2, .grid-asymmetric {
+        grid-template-columns: 1fr;
+      }
+      .slide-card {
+        overflow-y: auto;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .deck {
+        scroll-behavior: auto;
+      }
+      .shot-frame, .dot-link, .hud-btn {
+        transition: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Minimalist Controls -->
+  <header class="hud-header" style="justify-content:flex-end;">
+    <div class="hud-controls">
+      <span class="slide-counter" id="slideCounter" aria-live="polite">1 / 9</span>
+      <button type="button" class="hud-btn" id="fsBtn" aria-label="Pantalla completa">⛶</button>
+    </div>
+  </header>
+
+  <!-- Slides Container -->
+  <main class="deck" id="deck" tabindex="0" role="region" aria-label="Diapositivas de presentación UberBuses">
+
+    <!-- SLIDE 1: PORTADA / PITCH INTRO -->
+    <section class="slide-wrapper" id="slide-1">
+      <article class="slide-card">
+        <div class="slide-head">
+          <span class="pill pill-brand">● Sustentación de Prototipo · Área Metropolitana de Cúcuta</span>
+        </div>
+
+        <div class="cover-layout">
+          <div style="display:flex; flex-direction:column; gap:18px;">
+            <h1>Uber<span class="accent-emerald">Buses</span></h1>
+            <p style="font-size:1.15rem; color:var(--ink-primary); font-weight:500;">
+              Sistema inteligente de información, planificación de rutas y pago electrónico NFC para el transporte público en busetas.
+            </p>
+            <p>
+              Conecta a <strong>pasajeros</strong>, <strong>conductores</strong> y <strong>empresas transportadoras</strong> en una sola plataforma web progresiva (PWA) con ubicación en tiempo real sobre Cúcuta, Los Patios y Villa del Rosario.
+            </p>
+          </div>
+
+          <div class="stat-grid">
+            <div class="stat-box" style="background:var(--brand-50); border-color:var(--brand-200);">
+              <div class="stat-value" style="color:var(--brand-700);">8 Rutas</div>
+              <div class="stat-label">Geometrías viales reales (OSRM)</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-value">$3.400</div>
+              <div class="stat-label">Tarifa única AMC integrada</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-value">3 Roles</div>
+              <div class="stat-label">Pasajero · Conductor · Admin</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-value">PWA + NFC</div>
+              <div class="stat-label">Web NFC + Simulador offline</div>
+            </div>
+          </div>
+        </div>
+
+      </article>
+    </section>
+
+    <!-- SLIDE 2: PROBLEMA Y NECESIDAD -->
+    <section class="slide-wrapper" id="slide-2">
+      <article class="slide-card">
+        <div class="slide-head">
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <span class="pill pill-red">01 · Necesidad que Resuelve</span>
+            <h2>¿Por qué hoy es difícil moverse en buseta?</h2>
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <div class="bento-card">
+            <div class="icon-box">📍</div>
+            <h3>Falta de información en tiempo real</h3>
+            <p>Los pasajeros desconocen qué ruta tomar, dónde están las busetas o cuánto tardarán en llegar a su paradero.</p>
+          </div>
+
+          <div class="bento-card">
+            <div class="icon-box">💵</div>
+            <h3>Fricción del pago en efectivo</h3>
+            <p>Depender del billete exacto genera demoras al abordar, pérdida de tiempo para el conductor y poco control de ingresos.</p>
+          </div>
+
+          <div class="bento-card">
+            <div class="icon-box">🚌</div>
+            <h3>Operación desconectada</h3>
+            <p>Las empresas y conductores carecen de tableros centralizados para monitorear ocupación, frecuencia e incidentes en ruta.</p>
+          </div>
+        </div>
+
+        <p style="font-size:0.95rem;">
+          <strong>Impacto directo:</strong> tiempos de espera impredecibles, rutas subutilizadas y barreras para estudiantes, turistas o nuevos usuarios en el área metropolitana.
+        </p>
+      </article>
+    </section>
+
+    <!-- SLIDE 3: MINI PITCH DE LA SOLUCIÓN -->
+    <section class="slide-wrapper" id="slide-3">
+      <article class="slide-card">
+        <div class="slide-head">
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <span class="pill pill-brand">02 · Propuesta de Valor</span>
+            <h2>De "adivinar la ruta" a movilidad inteligente</h2>
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <div class="bento-card highlight">
+            <div class="icon-box emerald">1</div>
+            <h3>Planifica tu viaje</h3>
+            <p>Elige origen y destino (por buscador o tocando el mapa) y recibe la ruta óptima con transbordos, paraderos y ETA estimado.</p>
+          </div>
+
+          <div class="bento-card highlight">
+            <div class="icon-box emerald">2</div>
+            <h3>Sigue la buseta en vivo</h3>
+            <p>Visualiza unidades en movimiento sobre trazados reales, consulta su ocupación actual y recibe alertas de tráfico.</p>
+          </div>
+
+          <div class="bento-card highlight">
+            <div class="icon-box emerald">3</div>
+            <h3>Paga sin efectivo (NFC)</h3>
+            <p>Acerca tu dispositivo o usa la billetera digital para pagar los $3.400 COP y obtener un tiquete QR verificable al instante.</p>
+          </div>
+        </div>
+
+        <div class="bento-card" style="flex-direction:row; align-items:center; justify-content:space-between; padding:16px 22px;">
+          <span style="font-weight:700; font-size:0.95rem;">Ecosistema unificado:</span>
+          <div class="chip-row">
+            <span class="chip">Pasajero (/)</span>
+            <span class="chip">Conductor (/conductor)</span>
+            <span class="chip">Administrador (/admin)</span>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <!-- SLIDE 4: CAPTURAS PITCH - PLANIFICADOR Y MAPA -->
+    <section class="slide-wrapper" id="slide-4">
+      <article class="slide-card">
+        <div class="slide-head">
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <span class="pill pill-brand">03 · Evidencia Funcional</span>
+            <h2>Planificador de Viajes &amp; Mapa en Vivo</h2>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <figure class="shot-frame" data-full="capturas/01_planificador.png" data-title="Planificador de Rutas y Selección de Destino">
+            <img src="capturas/01_planificador.png" alt="Pantalla principal con planificador de rutas y mapa de Cúcuta" loading="lazy" />
+            <figcaption class="shot-caption">
+              <span>Planificador origen → destino</span>
+              <span class="tag">Pasajero</span>
+            </figcaption>
+          </figure>
+
+          <figure class="shot-frame" data-full="capturas/02_mapa_telemetria.png" data-title="Mapa en Vivo con Telemetría de Busetas">
+            <img src="capturas/02_mapa_telemetria.png" alt="Mapa en vivo mostrando busetas y ficha de telemetría" loading="lazy" />
+            <figcaption class="shot-caption">
+              <span>Telemetría y ocupación en vivo</span>
+              <span class="tag">Tiempo Real</span>
+            </figcaption>
+          </figure>
+        </div>
+      </article>
+    </section>
+
+    <!-- SLIDE 5: CAPTURAS PITCH - PAGO NFC, TIQUETE Y BILLETERA -->
+    <section class="slide-wrapper" id="slide-5">
+      <article class="slide-card">
+        <div class="slide-head">
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <span class="pill pill-brand">03 · Evidencia Funcional</span>
+            <h2>Pago Sin Contacto (NFC), Tiquete &amp; Billetera</h2>
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <figure class="shot-frame" data-full="capturas/03_pago_nfc.png" data-title="Modal de Pago NFC con Simulador Integrado">
+            <img src="capturas/03_pago_nfc.png" alt="Interfaz de pago sin contacto NFC" loading="lazy" />
+            <figcaption class="shot-caption">
+              <span>Pago NFC / Simulación</span>
+              <span class="tag">Web NFC</span>
+            </figcaption>
+          </figure>
+
+          <figure class="shot-frame" data-full="capturas/04_tique_digital.png" data-title="Comprobante y Tiquete Digital QR">
+            <img src="capturas/04_tique_digital.png" alt="Tiquete digital generado tras el pago" loading="lazy" />
+            <figcaption class="shot-caption">
+              <span>Tiquete digital QR</span>
+              <span class="tag">Comprobante</span>
+            </figcaption>
+          </figure>
+
+          <figure class="shot-frame" data-full="capturas/05_billetera.png" data-title="Billetera Digital y Recargas">
+            <img src="capturas/05_billetera.png" alt="Vista de billetera digital con saldo e historial" loading="lazy" />
+            <figcaption class="shot-caption">
+              <span>Billetera e historial</span>
+              <span class="tag">Saldo COP</span>
+            </figcaption>
+          </figure>
+        </div>
+      </article>
+    </section>
+
+    <!-- SLIDE 6: CAPTURAS PITCH - RUTAS, CONDUCTOR Y ADMIN -->
+    <section class="slide-wrapper" id="slide-6">
+      <article class="slide-card">
+        <div class="slide-head">
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <span class="pill pill-brand">03 · Evidencia Funcional</span>
+            <h2>Catálogo de Rutas, Conductor &amp; Administración</h2>
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <figure class="shot-frame" data-full="capturas/06_rutas.png" data-title="Catálogo de Rutas del Área Metropolitana">
+            <img src="capturas/06_rutas.png" alt="Catálogo completo de rutas de busetas" loading="lazy" />
+            <figcaption class="shot-caption">
+              <span>Catálogo de 8 rutas</span>
+              <span class="tag">Cobertura</span>
+            </figcaption>
+          </figure>
+
+          <figure class="shot-frame" data-full="capturas/07_conductor.png" data-title="Consola del Conductor en Ruta">
+            <img src="capturas/07_conductor.png" alt="Consola de control para el conductor de la buseta" loading="lazy" />
+            <figcaption class="shot-caption">
+              <span>Consola del conductor</span>
+              <span class="tag">/conductor</span>
+            </figcaption>
+          </figure>
+
+          <figure class="shot-frame" data-full="capturas/08_admin.png" data-title="Panel General de Administración de Flota">
+            <img src="capturas/08_admin.png" alt="Panel administrativo de flota y métricas" loading="lazy" />
+            <figcaption class="shot-caption">
+              <span>Panel de flota y KPIs</span>
+              <span class="tag">/admin</span>
+            </figcaption>
+          </figure>
+        </div>
+      </article>
+    </section>
+
+    <!-- SLIDE 7: GUÍA PARA LA DEMO EN VIVO (5 MIN) -->
+    <section class="slide-wrapper" id="slide-7">
+      <article class="slide-card">
+        <div class="slide-head">
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <span class="pill pill-gold">04 · Recorrido del Prototipo</span>
+            <h2>Guía rápida para la Demostración en Vivo</h2>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div style="display:flex; flex-direction:column; gap:14px;">
+            <div class="bento-card">
+              <h3>1. Planificar ruta (1.5 min)</h3>
+              <p>Seleccionar origen (Centro) y destino (UFPS) → comparar opciones directas y con transbordo.</p>
+            </div>
+            <div class="bento-card">
+              <h3>2. Telemetría y Pago NFC (1.5 min)</h3>
+              <p>Tocar una buseta en el mapa, abrir pago NFC, simular lectura y mostrar el tiquete digital + descuento en billetera.</p>
+            </div>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:14px;">
+            <div class="bento-card">
+              <h3>3. Consola Conductor (1 min)</h3>
+              <p>Cambiar a <code>/conductor</code> para registrar ascenso/descenso de pasajeros y emitir alertas.</p>
+            </div>
+            <div class="bento-card">
+              <h3>4. Panel Administrador (1 min)</h3>
+              <p>Cambiar a <code>/admin</code> para supervisar flota activa, recaudo y cobertura metropolitana.</p>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:13px; color:var(--ink-secondary);">También incluye manuales HTML dedicados para cliente, conductor y administrador.</span>
+          <a href="../dist/index.html" target="_blank" rel="noopener" class="pill pill-dark" style="text-decoration:none;">Abrir Prototipo ↗</a>
+        </div>
+      </article>
+    </section>
+
+    <!-- SLIDE 8: EXPLICACIÓN TÉCNICA (3 MIN) -->
+    <section class="slide-wrapper" id="slide-8">
+      <article class="slide-card">
+        <div class="slide-head">
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <span class="pill pill-dark">05 · Arquitectura &amp; Stack</span>
+            <h2>Explicación Técnica de la Solución</h2>
+          </div>
+        </div>
+
+        <div class="grid-asymmetric">
+          <div class="bento-card" style="block-size:100%; justify-content:center;">
+            <h3>Stack Tecnológico</h3>
+            <div class="chip-row" style="margin-block:6px;">
+              <span class="chip">React 18 + TypeScript</span>
+              <span class="chip">Vite 6</span>
+              <span class="chip">Tailwind CSS</span>
+              <span class="chip">Leaflet + OSRM</span>
+              <span class="chip">Framer Motion</span>
+              <span class="chip">PWA + Service Worker</span>
+            </div>
+            <p style="font-size:0.92rem; margin-block-start:8px;">
+              Interfaz responsiva adaptada a móvil y escritorio con soporte offline básico y contenedor Docker listo para despliegue.
+            </p>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            <div class="bento-card">
+              <h3>Arquitectura Desacoplada (Core · Infraestructura · UI)</h3>
+              <p style="font-size:0.9rem;">Contratos en <code>src/core/contracts/</code> separan la lógica de negocio del almacenamiento (<code>LocalStorageWalletRepository</code>, <code>InMemoryTransitRepository</code>).</p>
+            </div>
+            <div class="bento-card">
+              <h3>Patrones de Diseño Aplicados</h3>
+              <p style="font-size:0.9rem;"><strong>Strategy</strong> para algoritmos de rutas y métodos de pago; <strong>Factory</strong> (<code>TicketFactory</code>) para emisión de tiquetes.</p>
+            </div>
+            <div class="bento-card">
+              <h3>Integración de Hardware &amp; Geo</h3>
+              <p style="font-size:0.9rem;"><code>DeviceCapabilityService</code> detecta Web NFC, GPS y vibración con modo de simulación automático; <code>GeoMath</code> calcula distancias y snaps viales.</p>
+            </div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <!-- SLIDE 9: IMPACTO, FUTURO Y PREGUNTAS -->
+    <section class="slide-wrapper" id="slide-9">
+      <article class="slide-card">
+        <div class="slide-head">
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <span class="pill pill-brand">06 · Cierre &amp; Proyección</span>
+            <h2>Impacto, Escalabilidad y Preguntas</h2>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="bento-card highlight">
+            <h3>Impacto del Prototipo</h3>
+            <p>Reduce la incertidumbre del usuario, moderniza el recaudo sin efectivo y entrega visibilidad operativa al transporte público local de Cúcuta.</p>
+          </div>
+
+          <div class="bento-card">
+            <h3>Evolución Futura</h3>
+            <p>Conexión con GPS IoT reales en flota, pasarela de recarga en línea, base de datos centralizada y analítica predictiva de demanda.</p>
+          </div>
+        </div>
+
+        <div style="text-align:center; padding-block:12px;">
+          <h2 style="font-size:2rem;">¡Muchas gracias!</h2>
+          <p style="margin-block-start:6px;">Espacio abierto para preguntas y verificación técnica.</p>
+        </div>
+      </article>
+    </section>
+
+  </main>
+
+  <!-- Bottom Navigation Dots -->
+  <footer class="hud-footer">
+    <nav class="dot-nav" aria-label="Navegación de diapositivas">
+      <ul id="dotList">
+        <li><a href="#slide-1" class="dot-link" aria-label="Diapositiva 1" aria-current="location"></a></li>
+        <li><a href="#slide-2" class="dot-link" aria-label="Diapositiva 2"></a></li>
+        <li><a href="#slide-3" class="dot-link" aria-label="Diapositiva 3"></a></li>
+        <li><a href="#slide-4" class="dot-link" aria-label="Diapositiva 4"></a></li>
+        <li><a href="#slide-5" class="dot-link" aria-label="Diapositiva 5"></a></li>
+        <li><a href="#slide-6" class="dot-link" aria-label="Diapositiva 6"></a></li>
+        <li><a href="#slide-7" class="dot-link" aria-label="Diapositiva 7"></a></li>
+        <li><a href="#slide-8" class="dot-link" aria-label="Diapositiva 8"></a></li>
+        <li><a href="#slide-9" class="dot-link" aria-label="Diapositiva 9"></a></li>
+      </ul>
+    </nav>
+  </footer>
+
+  <!-- Native Dialog Lightbox for Screenshots -->
+  <dialog id="lightbox" aria-labelledby="lightboxTitle">
+    <div class="lightbox-inner">
+      <div class="lightbox-top">
+        <strong id="lightboxTitle" style="font-size:14px;">Captura del aplicativo</strong>
+        <button type="button" class="hud-btn" id="closeLightbox" aria-label="Cerrar vista ampliada">Cerrar ✕</button>
+      </div>
+      <img id="lightboxImg" src="" alt="" />
+    </div>
+  </dialog>
+
+  <script>
+    const deck = document.getElementById('deck');
+    const slides = [...document.querySelectorAll('.slide-wrapper')];
+    const dots = [...document.querySelectorAll('.dot-link')];
+    const counter = document.getElementById('slideCounter');
+    const fsBtn = document.getElementById('fsBtn');
+
+    let currentIndex = 0;
+
+    function syncActiveSlide(index) {
+      currentIndex = Math.max(0, Math.min(index, slides.length - 1));
+      counter.textContent = `${currentIndex + 1} / ${slides.length}`;
+      dots.forEach((dot, i) => {
+        if (i === currentIndex) {
+          dot.setAttribute('aria-current', 'location');
+        } else {
+          dot.removeAttribute('aria-current');
+        }
+      });
+    }
+
+    function goToSlide(index) {
+      const target = Math.max(0, Math.min(index, slides.length - 1));
+      slides[target].scrollIntoView({ behavior: 'smooth', inline: 'start' });
+    }
+
+    // Native scrollsnapchange when supported, IntersectionObserver fallback otherwise
+    if ('onscrollsnapchange' in HTMLElement.prototype) {
+      deck.addEventListener('scrollsnapchange', (event) => {
+        const idx = slides.indexOf(event.snapTargetInline);
+        if (idx !== -1) syncActiveSlide(idx);
+      });
+    } else {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
+              const idx = slides.indexOf(entry.target);
+              if (idx !== -1) syncActiveSlide(idx);
+            }
+          });
+        },
+        { root: deck, threshold: [0.6] }
+      );
+      slides.forEach((s) => observer.observe(s));
+    }
+
+    dots.forEach((dot, i) => {
+      dot.addEventListener('click', (e) => {
+        e.preventDefault();
+        goToSlide(i);
+      });
+    });
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (document.getElementById('lightbox').open) return;
+      if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') {
+        e.preventDefault();
+        goToSlide(currentIndex + 1);
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        e.preventDefault();
+        goToSlide(currentIndex - 1);
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        goToSlide(0);
+      } else if (e.key === 'End') {
+        e.preventDefault();
+        goToSlide(slides.length - 1);
+      }
+    });
+
+    // Fullscreen toggle
+    fsBtn.addEventListener('click', () => {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen?.();
+      } else {
+        document.exitFullscreen?.();
+      }
+    });
+
+    // Lightbox for screenshots
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightboxImg');
+    const lightboxTitle = document.getElementById('lightboxTitle');
+    const closeLightbox = document.getElementById('closeLightbox');
+
+    document.querySelectorAll('.shot-frame').forEach((frame) => {
+      frame.addEventListener('click', () => {
+        lightboxImg.src = frame.dataset.full;
+        lightboxImg.alt = frame.dataset.title;
+        lightboxTitle.textContent = frame.dataset.title;
+        lightbox.showModal();
+      });
+    });
+
+    closeLightbox.addEventListener('click', () => lightbox.close());
+    lightbox.addEventListener('click', (e) => {
+      if (e.target === lightbox) lightbox.close();
+    });
+  </script>
+</body>
+</html>

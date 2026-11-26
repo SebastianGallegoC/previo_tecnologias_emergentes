@@ -1,0 +1,27 @@
+services:
+  # Servidor de Desarrollo con Bind Mount y Hot-Reload en tiempo real (puerto 8080)
+  uberbuses:
+    build:
+      context: .
+      target: dev
+    container_name: uberbuses-pwa
+    ports:
+      - "8080:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+    restart: unless-stopped
+
+  # Servidor de Producción Nginx (opcional: docker compose --profile prod up -d --build)
+  uberbuses-prod:
+    profiles: ["prod"]
+    build:
+      context: .
+      target: prod
+    container_name: uberbuses-pwa-prod
+    ports:
+      - "8081:80"
+    restart: unless-stopped

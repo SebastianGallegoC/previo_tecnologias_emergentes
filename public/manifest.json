@@ -1,0 +1,26 @@
+{
+  "name": "TransCúcuta Inteligente - PWA",
+  "short_name": "TransCúcuta",
+  "description": "Sistema Inteligente de Transporte Público, Planificación y Pago NFC para Cúcuta, Los Patios y Villa del Rosario",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#10b981",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["travel", "navigation", "transportation"],
+  "lang": "es-CO"
+}
