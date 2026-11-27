@@ -40,10 +40,6 @@ const ROLE_TABS: Record<
     { id: 'rutas', label: 'Rutas', icon: Route },
     { id: 'billetera', label: 'Billetera', icon: Wallet },
   ],
-  conductor: [
-    { id: 'conductor', label: 'Mi Unidad', icon: Car },
-    { id: 'mapa', label: 'Mapa de Ruta', icon: Compass },
-  ],
   administrador: [
     { id: 'admin', label: 'Panel General', icon: ShieldCheck },
     { id: 'mapa', label: 'Mapa de Flota', icon: Compass },
@@ -64,9 +60,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const navItems = ROLE_TABS[userRole];
   const manualHref =
-    userRole === 'conductor'
-      ? '/manual_conductor.html'
-      : userRole === 'administrador'
+    userRole === 'administrador'
       ? '/manual_admin.html'
       : '/manual_cliente.html';
 
@@ -128,7 +122,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           {userRole !== 'pasajero' && (
             <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-neutral-100 border border-neutral-200 text-neutral-800">
-              {userRole === 'conductor' ? 'Modo Conductor' : 'Administrador'}
+              Administrador
             </span>
           )}
 

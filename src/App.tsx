@@ -28,7 +28,6 @@ import { LiveMap } from './components/LiveMap';
 import { MobileSheetState, TripPlanner } from './components/TripPlanner';
 import { WalletView } from './components/WalletView';
 import { RoutesCatalog } from './components/RoutesCatalog';
-import { DriverConsole } from './components/DriverConsole';
 import { AdminDashboard } from './components/AdminDashboard';
 import { NfcPaymentModal } from './components/NfcPaymentModal';
 import { TicketModal } from './components/TicketModal';
@@ -73,9 +72,6 @@ function resolveRoleFromPath(pathname: string): {
   if (normalized.startsWith('/admin')) {
     return { role: 'administrador', defaultTab: 'admin' };
   }
-  if (normalized.startsWith('/conductor')) {
-    return { role: 'conductor', defaultTab: 'conductor' };
-  }
   return { role: 'pasajero', defaultTab: 'planear' };
 }
 
@@ -92,21 +88,13 @@ export const App: React.FC = () => {
   );
   const [currentTab, setCurrentTab] = useState<AppTabId>(() => {
     const activeRole = authService.getSession()?.role ?? initialRoute.role;
-    if (activeRole === 'administrador') return 'admin';
-    if (activeRole === 'conductor') return 'conductor';
-    return 'planear';
+    return activeRole === 'administrador' ? 'admin' : 'planear';
   });
 
   const handleAuthenticated = (user: AuthUser) => {
     setAuthUser(user);
     setUserRole(user.role);
-    setCurrentTab(
-      user.role === 'administrador'
-        ? 'admin'
-        : user.role === 'conductor'
-        ? 'conductor'
-        : 'planear'
-    );
+    setCurrentTab(user.role === 'administrador' ? 'admin' : 'planear');
   };
 
   const handleLogout = () => {
@@ -210,9 +198,10 @@ export const App: React.FC = () => {
     setFlyTarget({
       lat: effectiveCoords.lat,
       lng: effectiveCoords.lng,
-      zoom: 15,
+      zoom: 16,
       ts: Date.now(),
     });
+    setMobileSheetState((prev) => (prev === 'full' ? 'half' : prev));
   }, []);
 
   const handleUseCurrentLocation = useCallback(() => {
@@ -420,26 +409,6 @@ export const App: React.FC = () => {
           />
         );
 
-      case 'conductor':
-        return (
-          <DriverConsole
-            buses={buses}
-            onUpdateBusPassengers={handleUpdateBusPassengers}
-            onSelectBusOnMap={(busId) => {
-              setSelectedBusId(busId);
-              const found = buses.find((b) => b.id === busId);
-              if (found) {
-                setFlyTarget({
-                  lat: found.coordinates.lat,
-                  lng: found.coordinates.lng,
-                  zoom: 15,
-                  ts: Date.now(),
-                });
-              }
-            }}
-          />
-        );
-
       case 'nfc':
         return (
           <div className="h-full overflow-y-auto bg-neutral-50 flex items-center justify-center p-4 pb-24 lg:pb-6">
@@ -575,16 +544,7 @@ export const App: React.FC = () => {
       : 'h-[82dvh]';
 
   if (!authUser) {
-    return (
-      <AuthScreen
-        defaultPortal={
-          window.location.pathname.toLowerCase().startsWith('/admin')
-            ? 'administrador'
-            : 'usuario'
-        }
-        onAuthenticated={handleAuthenticated}
-      />
-    );
+    return <AuthScreen onAuthenticated={handleAuthenticated} />;
   }
 
   return (
@@ -680,9 +640,7 @@ export const App: React.FC = () => {
             activePlan={activePlan}
             alternativePlans={allPlans.filter((p) => p.id !== activePlan?.id)}
             focusTripOnly={userRole === 'pasajero' && currentTab === 'planear'}
-            driverOnlyBusId={
-              userRole === 'conductor' ? selectedBusId || buses[0]?.id || null : null
-            }
+            driverOnlyBusId={null}
             mapPickMode={mapPickMode}
             onStartMapPick={handleStartMapPick}
             onCancelMapPick={() => setMapPickMode(null)}

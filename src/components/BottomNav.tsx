@@ -42,10 +42,6 @@ export const BottomNav: React.FC<BottomNavProps> = ({
       { id: 'rutas', label: 'Rutas', icon: Route },
       { id: 'billetera', label: 'Billetera', icon: Wallet },
     ],
-    conductor: [
-      { id: 'conductor', label: 'Mi Unidad', icon: Car },
-      { id: 'mapa', label: 'Mapa Ruta', icon: Compass },
-    ],
     administrador: [
       { id: 'admin', label: 'Panel', icon: ShieldCheck },
       { id: 'mapa', label: 'Mapa Flota', icon: Compass },

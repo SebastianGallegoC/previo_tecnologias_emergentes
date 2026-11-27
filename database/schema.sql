@@ -16,10 +16,11 @@ CREATE TABLE cooperativas (
 -- 2. Usuarios del Sistema (Pasajeros, Conductores, Administradores)
 CREATE TABLE usuarios (
     id              VARCHAR(36) PRIMARY KEY,
+    username        VARCHAR(80) UNIQUE,
     nombre_completo VARCHAR(120) NOT NULL,
     correo          VARCHAR(150) NOT NULL UNIQUE,
     telefono        VARCHAR(30),
-    rol             VARCHAR(20) NOT NULL CHECK (rol IN ('pasajero', 'conductor', 'administrador')),
+    rol             VARCHAR(20) NOT NULL CHECK (rol IN ('pasajero', 'administrador')),
     password_hash   VARCHAR(255) NOT NULL,
     activo          BOOLEAN NOT NULL DEFAULT TRUE,
     created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP

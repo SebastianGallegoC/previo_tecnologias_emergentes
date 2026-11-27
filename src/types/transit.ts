@@ -1,8 +1,8 @@
 export type Municipality = 'Cúcuta' | 'Los Patios' | 'Villa del Rosario';
 
-export type AppTabId = 'mapa' | 'planear' | 'nfc' | 'billetera' | 'rutas' | 'conductor' | 'admin';
+export type AppTabId = 'mapa' | 'planear' | 'nfc' | 'billetera' | 'rutas' | 'admin';
 
-export type UserRole = 'pasajero' | 'conductor' | 'administrador';
+export type UserRole = 'pasajero' | 'administrador';
 
 export type PaymentMethodType = 'NFC' | 'QR' | 'Saldo Billetera';
 

@@ -40,3 +40,6 @@ desktop.ini
 # Office temporary lock files
 ~$*.docx
 ~$*.xlsx
+
+# Local documentation deliverables (excluded from git)
+documentos/

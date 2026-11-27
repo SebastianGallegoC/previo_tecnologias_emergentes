@@ -1,10 +1,51 @@
 services:
-  # Servidor de Desarrollo con Bind Mount y Hot-Reload en tiempo real (puerto 8080)
-  uberbuses:
+  # 1. Base de Datos PostgreSQL en contenedor independiente
+  db:
+    image: postgres:16-alpine
+    container_name: uberbuses-postgres
+    environment:
+      - POSTGRES_USER=uberbuses
+      - POSTGRES_PASSWORD=uberbuses_pass
+      - POSTGRES_DB=uberbuses
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./database/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U uberbuses -d uberbuses"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  # 2. Backend API REST (Node.js + Express + TypeScript)
+  backend:
+    build:
+      context: ./backend
+    container_name: uberbuses-backend
+    ports:
+      - "4000:4000"
+    environment:
+      - PORT=4000
+      - PGHOST=db
+      - PGPORT=5432
+      - PGUSER=uberbuses
+      - PGPASSWORD=uberbuses_pass
+      - PGDATABASE=uberbuses
+      - JWT_SECRET=uberbuses-cucuta-prod-secret
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # 3. Frontend Web (Vite Dev Server con proxy /api -> backend)
+  frontend:
     build:
       context: .
       target: dev
-    container_name: uberbuses-pwa
+    container_name: uberbuses-frontend
     ports:
       - "8080:3000"
     volumes:
@@ -13,15 +54,23 @@ services:
     environment:
       - CHOKIDAR_USEPOLLING=true
       - WATCHPACK_POLLING=true
+      - VITE_API_PROXY_TARGET=http://backend:4000
+    depends_on:
+      - backend
     restart: unless-stopped
 
-  # Servidor de Producción Nginx (opcional: docker compose --profile prod up -d --build)
-  uberbuses-prod:
+  # Frontend Producción Nginx (opcional: docker compose --profile prod up -d --build)
+  frontend-prod:
     profiles: ["prod"]
     build:
       context: .
       target: prod
-    container_name: uberbuses-pwa-prod
+    container_name: uberbuses-frontend-prod
     ports:
       - "8081:80"
+    depends_on:
+      - backend
     restart: unless-stopped
+
+volumes:
+  pgdata:

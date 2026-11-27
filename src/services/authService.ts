@@ -13,6 +13,7 @@ interface StoredUser extends AuthUser {
 
 const USERS_KEY = 'uberbuses_auth_users_v1';
 const SESSION_KEY = 'uberbuses_auth_session_v1';
+const TOKEN_KEY = 'uberbuses_auth_token_v1';
 
 const DEFAULT_USERS: StoredUser[] = [
   {
@@ -21,13 +22,6 @@ const DEFAULT_USERS: StoredUser[] = [
     email: 'pasajero@uberbuses.co',
     password: '123456',
     role: 'pasajero',
-  },
-  {
-    id: 'usr-con-01',
-    username: 'conductor',
-    email: 'conductor@uberbuses.co',
-    password: '123456',
-    role: 'conductor',
   },
   {
     id: 'usr-adm-01',
@@ -56,7 +50,16 @@ function saveUsers(users: StoredUser[]): void {
   try {
     localStorage.setItem(USERS_KEY, JSON.stringify(users));
   } catch {
-    // Ignore storage quota errors in restricted modes
+    // Ignore storage quota errors
+  }
+}
+
+function persistSession(user: AuthUser, token?: string): void {
+  try {
+    localStorage.setItem(SESSION_KEY, JSON.stringify(user));
+    if (token) localStorage.setItem(TOKEN_KEY, token);
+  } catch {
+    // Ignore storage errors
   }
 }
 
@@ -71,14 +74,41 @@ export const authService = {
     }
   },
 
-  login(
+  getToken(): string | null {
+    try {
+      return localStorage.getItem(TOKEN_KEY);
+    } catch {
+      return null;
+    }
+  },
+
+  async login(
     identifier: string,
-    password: string,
-    portal: 'usuario' | 'administrador'
-  ): { ok: true; user: AuthUser } | { ok: false; error: string } {
+    password: string
+  ): Promise<{ ok: true; user: AuthUser } | { ok: false; error: string }> {
     const cleanId = identifier.trim().toLowerCase();
     if (!cleanId || !password) {
       return { ok: false, error: 'Ingresa tu correo o usuario y tu contraseña.' };
+    }
+
+    // Try Backend REST API first
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ identifier: cleanId, password }),
+      });
+      if (res.ok) {
+        const data = (await res.json()) as { user: AuthUser; token: string };
+        persistSession(data.user, data.token);
+        return { ok: true, user: data.user };
+      }
+      if (res.status === 401 || res.status === 400) {
+        const errBody = (await res.json()) as { error?: string };
+        return { ok: false, error: errBody.error || 'Credenciales incorrectas.' };
+      }
+    } catch {
+      // Backend unreachable: fall back to local storage demo mode
     }
 
     const users = loadUsers();
@@ -92,34 +122,21 @@ export const authService = {
       return { ok: false, error: 'Credenciales incorrectas. Verifica tus datos.' };
     }
 
-    if (portal === 'administrador' && found.role !== 'administrador') {
-      return {
-        ok: false,
-        error: 'Esta cuenta no tiene permisos de administrador.',
-      };
-    }
-
     const sessionUser: AuthUser = {
       id: found.id,
       username: found.username,
       email: found.email,
       role: found.role,
     };
-
-    try {
-      localStorage.setItem(SESSION_KEY, JSON.stringify(sessionUser));
-    } catch {
-      // Ignore storage errors
-    }
-
+    persistSession(sessionUser);
     return { ok: true, user: sessionUser };
   },
 
-  register(
+  async register(
     email: string,
     username: string,
     password: string
-  ): { ok: true; user: AuthUser } | { ok: false; error: string } {
+  ): Promise<{ ok: true; user: AuthUser } | { ok: false; error: string }> {
     const cleanEmail = email.trim().toLowerCase();
     const cleanUser = username.trim();
 
@@ -131,6 +148,26 @@ export const authService = {
     }
     if (password.length < 6) {
       return { ok: false, error: 'La contraseña debe tener al menos 6 caracteres.' };
+    }
+
+    // Try Backend REST API first
+    try {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: cleanEmail, username: cleanUser, password }),
+      });
+      if (res.ok) {
+        const data = (await res.json()) as { user: AuthUser; token: string };
+        persistSession(data.user, data.token);
+        return { ok: true, user: data.user };
+      }
+      if (res.status === 400 || res.status === 409) {
+        const errBody = (await res.json()) as { error?: string };
+        return { ok: false, error: errBody.error || 'No se pudo completar el registro.' };
+      }
+    } catch {
+      // Backend unreachable: fall back to local storage demo mode
     }
 
     const users = loadUsers();
@@ -150,7 +187,6 @@ export const authService = {
       password,
       role: 'pasajero',
     };
-
     saveUsers([...users, newUser]);
 
     const sessionUser: AuthUser = {
@@ -159,19 +195,14 @@ export const authService = {
       email: newUser.email,
       role: newUser.role,
     };
-
-    try {
-      localStorage.setItem(SESSION_KEY, JSON.stringify(sessionUser));
-    } catch {
-      // Ignore storage errors
-    }
-
+    persistSession(sessionUser);
     return { ok: true, user: sessionUser };
   },
 
   logout(): void {
     try {
       localStorage.removeItem(SESSION_KEY);
+      localStorage.removeItem(TOKEN_KEY);
     } catch {
       // Ignore storage errors
     }

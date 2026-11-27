@@ -7,11 +7,9 @@ INSERT INTO cooperativas (id, nombre, nit, telefono) VALUES
 ('coop-corta',  'Corta Distancia S.A.', '890500456-2', '607-5710002'),
 ('coop-micro',  'Coomicro', '890500789-3', '607-5710003');
 
-INSERT INTO usuarios (id, nombre_completo, correo, telefono, rol, password_hash) VALUES
-('usr-pas-01', 'Laura Gómez', 'laura.gomez@correo.com', '3105550101', 'pasajero', '$2b$10$demoHashPasajero01'),
-('usr-con-01', 'Carlos Mendoza', 'carlos.mendoza@trasan.co', '3115550202', 'conductor', '$2b$10$demoHashConductor01'),
-('usr-con-02', 'Édgar Peñaranda', 'edgar.p@cortadistancia.co', '3125550303', 'conductor', '$2b$10$demoHashConductor02'),
-('usr-adm-01', 'Ana Patricia Ruiz', 'admin@uberbuses.co', '3155550404', 'administrador', '$2b$10$demoHashAdmin01');
+INSERT INTO usuarios (id, username, nombre_completo, correo, telefono, rol, password_hash) VALUES
+('usr-pas-01', 'pasajero', 'Laura Gómez', 'pasajero@uberbuses.co', '3105550101', 'pasajero', 'demo:123456'),
+('usr-adm-01', 'admin', 'Ana Patricia Ruiz', 'admin@uberbuses.co', '3155550404', 'administrador', 'demo:admin123');
 
 INSERT INTO rutas (id, codigo, nombre, cooperativa_id, color_hex, tarifa_cop, descripcion, sentido_a, sentido_b, horario_operacion, frecuencia_minutos) VALUES
 ('R01', 'R-01', 'Los Patios - Centro - Atalaya', 'coop-trasan', '#10b981', 3400, 'Corredor troncal sur-norte por Av. 10 de Los Patios, Av. Cero, Parque Santander y Atalaya.', 'Los Patios', 'Atalaya', '05:00 AM - 10:30 PM', 5),
@@ -32,8 +30,8 @@ INSERT INTO ruta_paraderos (ruta_id, paradero_id, orden_parada, sentido) VALUES
 ('R03', 'stop-cu-4', 6, 'ida');
 
 INSERT INTO vehiculos (id, codigo_interno, placa, cooperativa_id, ruta_id, conductor_id, capacidad_maxima, conteo_pasajeros, latitud_actual, longitud_actual, rumbo_grados, velocidad_kmh, estado, sentido_actual, proxima_parada_id) VALUES
-('bus-tr-101', 'TR-101', 'WFB-341', 'coop-trasan', 'R01', 'usr-con-01', 28, 16, 7.845800, -72.505700, 15, 22.00, 'en_ruta', 'ida', 'stop-cu-7'),
-('bus-cd-202', 'CD-202', 'THV-519', 'coop-corta', 'R02', 'usr-con-02', 28, 12, 7.833500, -72.462000, 310, 26.50, 'en_ruta', 'ida', 'stop-cu-7');
+('bus-tr-101', 'TR-101', 'WFB-341', 'coop-trasan', 'R01', NULL, 28, 16, 7.845800, -72.505700, 15, 22.00, 'en_ruta', 'ida', 'stop-cu-7'),
+('bus-cd-202', 'CD-202', 'THV-519', 'coop-corta', 'R02', NULL, 28, 12, 7.833500, -72.462000, 310, 26.50, 'en_ruta', 'ida', 'stop-cu-7');
 
 INSERT INTO billeteras (id, usuario_id, saldo_cop, estado) VALUES
 ('wal-pas-01', 'usr-pas-01', 35000, 'activa');
@@ -46,4 +44,4 @@ INSERT INTO tiquetes (id, codigo_tiquete, usuario_id, vehiculo_id, ruta_id, tran
 ('tk-001', 'TK-CUC-2026-84824', 'usr-pas-01', 'bus-tr-101', 'R01', 'tx-pay-01', 3400, 'Cúcuta', 'QR', 'válido', 'UBERBUSES|TK-CUC-2026-84824|R01|TR-101|3400', CURRENT_TIMESTAMP + INTERVAL '1 hour');
 
 INSERT INTO alertas_trafico (id, vehiculo_id, reportado_por, ubicacion, municipio, severidad, descripcion) VALUES
-('alt-001', 'bus-tr-101', 'usr-con-01', 'Puente y Redoma de San Rafael', 'Cúcuta', 'moderado', 'Flujo vehicular lento en sentido norte-sur por hora pico.');
+('alt-001', 'bus-tr-101', 'usr-adm-01', 'Puente y Redoma de San Rafael', 'Cúcuta', 'moderado', 'Flujo vehicular lento en sentido norte-sur por hora pico.');

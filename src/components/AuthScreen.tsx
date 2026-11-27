@@ -1,18 +1,13 @@
 import React, { useState } from 'react';
-import { Bus, Eye, EyeOff, Lock, Mail, ShieldCheck, User } from 'lucide-react';
+import { Bus, Eye, EyeOff, Lock, Mail, User } from 'lucide-react';
 import { authService, AuthUser } from '../services/authService';
 
 interface AuthScreenProps {
-  defaultPortal?: 'usuario' | 'administrador';
   onAuthenticated: (user: AuthUser) => void;
 }
 
-export const AuthScreen: React.FC<AuthScreenProps> = ({
-  defaultPortal = 'usuario',
-  onAuthenticated,
-}) => {
+export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthenticated }) => {
   const [mode, setMode] = useState<'login' | 'register'>('login');
-  const [portal, setPortal] = useState<'usuario' | 'administrador'>(defaultPortal);
 
   // Login fields
   const [identifier, setIdentifier] = useState('');
@@ -25,34 +20,44 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
 
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleLoginSubmit = (e: React.FormEvent) => {
+  const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    const res = authService.login(identifier, password, portal);
-    if (!res.ok) {
-      setError(res.error);
-      return;
+    setIsSubmitting(true);
+    try {
+      const res = await authService.login(identifier, password);
+      if (!res.ok) {
+        setError(res.error);
+        return;
+      }
+      onAuthenticated(res.user);
+    } finally {
+      setIsSubmitting(false);
     }
-    onAuthenticated(res.user);
   };
 
-  const handleRegisterSubmit = (e: React.FormEvent) => {
+  const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    const res = authService.register(regEmail, regUsername, regPassword);
-    if (!res.ok) {
-      setError(res.error);
-      return;
+    setIsSubmitting(true);
+    try {
+      const res = await authService.register(regEmail, regUsername, regPassword);
+      if (!res.ok) {
+        setError(res.error);
+        return;
+      }
+      onAuthenticated(res.user);
+    } finally {
+      setIsSubmitting(false);
     }
-    onAuthenticated(res.user);
   };
 
-  const fillDemo = (demoPortal: 'usuario' | 'administrador') => {
+  const fillDemo = (demoRole: 'usuario' | 'administrador') => {
     setMode('login');
-    setPortal(demoPortal);
     setError(null);
-    if (demoPortal === 'administrador') {
+    if (demoRole === 'administrador') {
       setIdentifier('admin@uberbuses.co');
       setPassword('admin123');
     } else {
@@ -128,40 +133,6 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
 
         {mode === 'login' ? (
           <form onSubmit={handleLoginSubmit} className="flex flex-col gap-4" noValidate>
-            {/* Portal Selector: Usuario vs Administrador */}
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setPortal('usuario');
-                  setError(null);
-                }}
-                className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl border text-xs font-semibold transition-all ${
-                  portal === 'usuario'
-                    ? 'border-emerald-500 bg-emerald-50 text-emerald-800'
-                    : 'border-neutral-200 bg-white text-neutral-600 hover:bg-neutral-50'
-                }`}
-              >
-                <User className="w-3.5 h-3.5" aria-hidden="true" />
-                <span>Usuario</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setPortal('administrador');
-                  setError(null);
-                }}
-                className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl border text-xs font-semibold transition-all ${
-                  portal === 'administrador'
-                    ? 'border-neutral-900 bg-neutral-900 text-white'
-                    : 'border-neutral-200 bg-white text-neutral-600 hover:bg-neutral-50'
-                }`}
-              >
-                <ShieldCheck className="w-3.5 h-3.5" aria-hidden="true" />
-                <span>Administrador</span>
-              </button>
-            </div>
-
             <div className="flex flex-col gap-1.5">
               <label
                 htmlFor="login-identifier"
@@ -181,11 +152,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                   required
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
-                  placeholder={
-                    portal === 'administrador'
-                      ? 'admin@uberbuses.co'
-                      : 'correo@ejemplo.com o usuario'
-                  }
+                  placeholder="correo@ejemplo.com o usuario"
                   className="w-full pl-10 pr-3.5 py-2.5 text-sm bg-neutral-50 border border-neutral-200 rounded-xl focus:bg-white focus:border-neutral-900 focus:outline-none"
                 />
               </div>
@@ -230,11 +197,10 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
 
             <button
               type="submit"
-              className="w-full py-3 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white text-sm font-bold transition-colors mt-1"
+              disabled={isSubmitting}
+              className="w-full py-3 rounded-xl bg-neutral-900 hover:bg-neutral-800 disabled:opacity-60 text-white text-sm font-bold transition-colors mt-1"
             >
-              {portal === 'administrador'
-                ? 'Ingresar como Administrador'
-                : 'Iniciar Sesión'}
+              {isSubmitting ? 'Ingresando...' : 'Iniciar Sesión'}
             </button>
 
             {/* Quick Demo Fill */}
@@ -352,9 +318,10 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
 
             <button
               type="submit"
-              className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold transition-colors mt-1"
+              disabled={isSubmitting}
+              className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white text-sm font-bold transition-colors mt-1"
             >
-              Crear Cuenta
+              {isSubmitting ? 'Creando cuenta...' : 'Crear Cuenta'}
             </button>
           </form>
         )}

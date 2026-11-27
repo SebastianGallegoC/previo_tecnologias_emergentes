@@ -164,6 +164,20 @@ export const LiveMap: React.FC<LiveMapProps> = ({
     if (mapPickMode) {
       setClickedMapCoords(null);
     }
+    if (originMarkerRef.current?.dragging) {
+      if (mapPickMode === 'origin') {
+        originMarkerRef.current.dragging.enable();
+      } else {
+        originMarkerRef.current.dragging.disable();
+      }
+    }
+    if (destMarkerRef.current?.dragging) {
+      if (mapPickMode === 'destination') {
+        destMarkerRef.current.dragging.enable();
+      } else {
+        destMarkerRef.current.dragging.disable();
+      }
+    }
   }, [mapPickMode, onMapPointPicked]);
 
   // Initialize Map with Esri Street & Satellite Base Layers (No API key required)
@@ -265,13 +279,20 @@ export const LiveMap: React.FC<LiveMapProps> = ({
     }
   }, [baseLayer]);
 
-  // Fly to external target when requested
+  // Fly to external target when requested (accounting for mobile bottom sheet)
   useEffect(() => {
-    if (!flyTarget || !mapInstanceRef.current) return;
-    mapInstanceRef.current.flyTo([flyTarget.lat, flyTarget.lng], flyTarget.zoom ?? 14, {
-      duration: 0.9,
-    });
-  }, [flyTarget]);
+    const map = mapInstanceRef.current;
+    if (!flyTarget || !map) return;
+    const targetZoom = flyTarget.zoom ?? 15;
+    if (isBottomSheetBlocking) {
+      const point = map.project([flyTarget.lat, flyTarget.lng], targetZoom);
+      const offsetPoint = point.add([0, Math.round(map.getSize().y * 0.22)]);
+      const adjustedLatLng = map.unproject(offsetPoint, targetZoom);
+      map.flyTo(adjustedLatLng, targetZoom, { duration: 0.8 });
+    } else {
+      map.flyTo([flyTarget.lat, flyTarget.lng], targetZoom, { duration: 0.8 });
+    }
+  }, [flyTarget, isBottomSheetBlocking]);
 
   // Fit bounds around active journey (Origin A, Boarding, Alighting, Dest B)
   const fitTripBounds = React.useCallback(() => {
@@ -341,6 +362,9 @@ export const LiveMap: React.FC<LiveMapProps> = ({
           [originEndpoint.coordinates.lat, originEndpoint.coordinates.lng],
           { icon: originIcon, draggable: true, zIndexOffset: 900 }
         ).addTo(map);
+        if (pickModeRef.current !== 'origin') {
+          m.dragging?.disable();
+        }
         m.on('dragend', () => {
           const pos = m.getLatLng();
           if (onPickedRef.current) {
@@ -382,6 +406,9 @@ export const LiveMap: React.FC<LiveMapProps> = ({
           [destEndpoint.coordinates.lat, destEndpoint.coordinates.lng],
           { icon: destIcon, draggable: true, zIndexOffset: 900 }
         ).addTo(map);
+        if (pickModeRef.current !== 'destination') {
+          m.dragging?.disable();
+        }
         m.on('dragend', () => {
           const pos = m.getLatLng();
           if (onPickedRef.current) {
@@ -1028,7 +1055,6 @@ export const LiveMap: React.FC<LiveMapProps> = ({
         icon: userIcon,
       }).addTo(map);
     }
-    map.flyTo([userCoords.lat, userCoords.lng], 14, { duration: 1.0 });
   }, [userCoords]);
 
   return (
